@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium Data Send Animation</title>
+
+<style>
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow:hidden;
+}
+
+/* Glass Container */
+.container{
+    position:relative;
+    width:900px;
+    height:450px;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 40px;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+}
+
+/* Holographic Nodes */
+.node {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 155px;
+}
+
+.node-core {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    z-index: 2;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: inset 0 0 15px rgba(255,255,255,0.1);
+}
+
+/* Rotating Outer Ring */
+.node-ring {
+    position: absolute;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    animation: rotate 10s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.source { left: 80px; }
+.source .node-core { box-shadow: 0 0 30px rgba(56, 189, 248, 0.4); border-color: #38bdf8; }
+.source .node-ring { border-color: #38bdf8; border-style: double; border-width: 4px; }
+
+.destination { right: 80px; }
+.destination .node-core { box-shadow: 0 0 30px rgba(74, 222, 128, 0.4); border-color: #4ade80; }
+.destination .node-ring { border-color: #4ade80; }
+
+/* Bird Styling */
+.bird-container {
+    position: absolute;
+    left: 140px;
+    top: 200px;
+    width: 50px;
+    height: 50px;
+    transition: all 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+}
+
+.bird-body {
+    width: 100%;
+    height: 100%;
+    fill: #fff;
+    filter: drop-shadow(0 0 8px rgba(255,255,255,0.9));
+}
+
+.flap .wing-top { animation: wingTop 0.2s infinite alternate ease-in-out; transform-origin: center; }
+.flap .wing-bottom { animation: wingBottom 0.2s infinite alternate ease-in-out; transform-origin: center; }
+
+@keyframes wingTop { from { transform: rotate(0deg); } to { transform: rotate(-45deg); } }
+@keyframes wingBottom { from { transform: rotate(0deg); } to { transform: rotate(45deg); } }
+
+/* Particles */
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #38bdf8;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #38bdf8;
+    opacity: 0;
+}
+
+/* Button */
+button {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 14px 40px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+    letter-spacing: 1px;
+}
+
+button:hover {
+    background: white;
+    color: black;
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="node source">
+        <div class="node-ring"></div>
+        <div class="node-core">SOURCE</div>
+    </div>
+
+    <div class="node destination">
+        <div class="node-ring" style="animation-direction: reverse;"></div>
+        <div class="node-core">DEST</div>
+    </div>
+    
+    <div class="bird-container" id="bird">
+        <svg viewBox="0 0 100 100" class="bird-body">
+            <path class="wing-top" d="M50,50 L20,30 L50,45 Z" />
+            <path class="wing-bottom" d="M50,50 L20,70 L50,55 Z" />
+            <path d="M50,45 L80,50 L50,55 L45,50 Z" />
+        </svg>
+    </div>
+
+    <button onclick="sendData()">Start Transmission</button>
+</div>
+
+<audio id="sendSound">
+    <source src="https://www.soundjay.com/buttons/sounds/button-3.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+function createParticles() {
+    for(let i=0;i<15;i++){
+        let p=document.createElement("div");
+        p.className="particle";
+        document.querySelector(".container").appendChild(p);
+        p.style.left=(160 + i*35)+"px";
+        p.style.top="220px";
+        setTimeout(()=>{
+            p.style.opacity=1;
+            p.style.transition="all 2s ease-in";
+            p.style.left="720px";
+        }, i * 60);
+        setTimeout(()=>{ p.remove(); }, 2500);
+    }
+}
+
+function sendData(){
+    const bird=document.getElementById("bird");
+    const sound=document.getElementById("sendSound");
+
+    bird.classList.add("flap");
+    sound.play();
+    createParticles();
+
+    bird.style.left="720px";
+    bird.style.top="190px";
+
+    setTimeout(()=>{
+        bird.classList.remove("flap");
+        bird.style.left="140px";
+        bird.style.top="200px";
+    },3000);
+}
+</script>
+
+</body>
+</html>
